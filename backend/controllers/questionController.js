@@ -19,7 +19,9 @@ exports.createQuestion = async (req, res) => {
       difficulty,
       explanation
     });
-
+    await redisClient.del(
+      "/api/questions"
+    );
     res.status(201).json(question);
 
   } catch (error) {

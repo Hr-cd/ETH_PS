@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const ROLES = require("../config/roles")
 
 const {
   createQuestion,
@@ -11,12 +12,18 @@ const protect = require(
   "../middleware/authMiddleware"
 );
 
+const cache =
+  require(
+    "../middleware/cacheMiddleware"
+  );
 
+const authorize =require("../middleware/roleMiddleware");
 
 // Create Question
 router.post(
   "/",
   protect,
+  authorize(ROLES.ADMIN),
   createQuestion
 );
 
@@ -26,6 +33,7 @@ router.post(
 router.get(
   "/",
   protect,
+  cache(300),
   getQuestions
 );
 

@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const morgan = require("morgan");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const protect = require("./middleware/authMiddleware");
@@ -8,6 +9,7 @@ const attemptRoutes = require("./routes/attemptRoutes");
 const analyticsRoutes = require("./routes/analyticsRoutes");
 const errorHandler = require("./middleware/errorHandler");
 const securityMiddleware = require("./middleware/security");
+const logger = require("./utils/logger");
 const app = express();
 const PORT = 3000;
 
@@ -19,6 +21,18 @@ app.use(cors());
 app.use(
   express.json({
     limit: "10kb"
+  })
+);
+app.use(
+  morgan("combined", {
+
+    stream: {
+      write: message =>
+        logger.info(
+          message.trim()
+        )
+    }
+
   })
 );
 app.use(errorHandler);

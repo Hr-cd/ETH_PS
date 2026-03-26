@@ -1,9 +1,18 @@
-const errorHandler =
-  (err, req, res, next) => {
+const logger =
+  require("../utils/logger");
 
-    console.error(
-      "GLOBAL ERROR:",
-      err
+const errorHandler =
+  (
+    err,
+    req,
+    res,
+    next
+  ) => {
+
+    logger.error(
+
+      `${req.method} ${req.originalUrl} - ${err.message}`
+
     );
 
     res.status(
