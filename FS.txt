@@ -1,0 +1,35 @@
+backend/
+│
+├── controllers/
+│     authController.js
+│     studentController.js
+│     questionController.js
+│     analysisController.js
+│
+├── models/
+│     User.js
+│     Question.js
+│     Attempt.js
+│
+├── routes/
+│     authRoutes.js
+│     questionRoutes.js
+│     analysisRoutes.js
+│
+├── services/
+│     aiService.js
+│     confusionService.js
+│
+├── middleware/
+│     authMiddleware.js
+│     errorMiddleware.js
+│
+├── config/
+│     db.js
+│     openai.js
+│
+├── utils/
+│     logger.js
+│
+├── app.js
+└── server.js
