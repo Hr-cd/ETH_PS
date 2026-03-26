@@ -118,3 +118,60 @@ exports.getAttemptsByUser = async (
     });
   }
 };
+
+
+exports.getUserAttempts = async (req, res) => {
+  try {
+
+    const userId =
+      req.user.userId;
+
+    const page =
+      parseInt(req.query.page) || 1;
+
+    const limit =
+      parseInt(req.query.limit) || 10;
+
+    const skip =
+      (page - 1) * limit;
+
+    const total =
+      await Attempt.countDocuments({
+        userId
+      });
+
+    const attempts =
+      await Attempt
+        .find({ userId })
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit);
+
+    res.json({
+
+      total,
+
+      page,
+
+      pages:
+        Math.ceil(total / limit),
+
+      data:
+        attempts
+
+    });
+
+  } catch (error) {
+
+    console.error(
+      "Fetch attempts error:",
+      error
+    );
+
+    res.status(500).json({
+      message:
+        "Server error"
+    });
+
+  }
+};

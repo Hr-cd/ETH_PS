@@ -1,6 +1,7 @@
 const User = require("../models/User");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const BlacklistedToken = require("../models/BlacklistedToken");
 
 
 // Register User
@@ -86,3 +87,55 @@ exports.loginUser = async (req, res) => {
     });
   }
 };
+
+exports.logoutUser =
+  async (req, res) => {
+
+    try {
+
+      const token =
+        req.header(
+          "Authorization"
+        )?.split(" ")[1];
+
+      if (!token) {
+        return res.status(400).json({
+          message:
+            "Token missing"
+        });
+      }
+
+      const decoded =
+        jwt.decode(token);
+
+      await BlacklistedToken.create({
+
+        token,
+
+        expiresAt:
+          new Date(
+            decoded.exp * 1000
+          )
+
+      });
+
+      res.json({
+        message:
+          "Logged out successfully"
+      });
+
+    } catch (error) {
+
+      console.error(
+        "Logout error:",
+        error
+      );
+
+      res.status(500).json({
+        message:
+          "Logout failed"
+      });
+
+    }
+
+  };

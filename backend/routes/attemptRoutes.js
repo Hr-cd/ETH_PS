@@ -5,9 +5,21 @@ const protect = require(
   "../middleware/authMiddleware"
 );
 
+const validateRequest =
+  require(
+    "../middleware/validateRequest"
+  );
+
+const {
+  submitAttemptRules
+} = require(
+  "../validators/attemptValidator"
+);
+  
 const {
   submitAttempt,
-  getAttemptsByUser
+  getAttemptsByUser,
+  getUserAttempts
 } = require(
   "../controllers/attemptController"
 );
@@ -17,6 +29,8 @@ const {
 router.post(
   "/",
   protect,
+  submitAttemptRules,
+  validateRequest,
   submitAttempt
 );
 
@@ -25,7 +39,8 @@ router.post(
 router.get(
   "/",
   protect,
-  getAttemptsByUser
+  getAttemptsByUser,
+  getUserAttempts
 );
 
 module.exports = router;
