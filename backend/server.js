@@ -3,6 +3,7 @@ const cors = require("cors");
 const connectDB = require("./config/db");
 const authRoutes = require("./routes/authRoutes");
 const protect = require("./middleware/authMiddleware");
+const questionRoutes = require("./routes/questionRoutes");
 const app = express();
 const PORT = 3000;
 
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes);
+app.use("/api/questions",questionRoutes);
 app.get("/api/protected", protect, (req, res) => {
   res.json({
     message: "Access granted",
