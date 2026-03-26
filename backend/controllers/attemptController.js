@@ -1,0 +1,120 @@
+const Attempt = require("../models/Attempt");
+const Question = require("../models/Question");
+const analyzeConfusion = require("../services/aiService");
+const validateAnswer = require("../services/mathValidator");
+
+
+// Submit Answer
+exports.submitAttempt = async (req, res) => {
+  try {
+    const {
+      questionId,
+      studentAnswer,
+      steps,
+      timeTaken
+    } = req.body;
+
+    const userId = req.user.userId;
+
+    // Get question
+    const question = await Question.findById(
+      questionId
+    );
+
+    if (!question) {
+      return res.status(404).json({
+        message: "Question not found"
+      });
+    }
+
+    // Check correctness
+    const isCorrect =
+      validateAnswer(
+        steps,
+        studentAnswer
+      );
+
+    let confusionType = null;
+    let reason = null;
+    let feedback = null;
+
+    if (!isCorrect) {
+      const analysis =
+        await analyzeConfusion(
+          question.questionText,
+          question.correctAnswer,
+          studentAnswer,
+          steps
+        );
+
+      confusionType =
+        analysis.confusionType;
+
+      reason =
+        analysis.reason;
+
+      feedback =
+        analysis.feedback;
+    }
+    else {
+
+      confusionType = "None";
+
+      reason =
+        "Student solved the problem correctly.";
+
+      feedback =
+        "Correct solution. Keep practicing.";
+
+    }
+
+    const attempt = await Attempt.create({
+      userId,
+      questionId,
+      studentAnswer,
+      steps,
+      timeTaken,
+      isCorrect,
+      confusionType,
+      reason,
+      feedback
+    });
+
+    res.status(201).json(attempt);
+
+  } 
+  catch (error) {
+
+  console.error("FULL ERROR:");
+  console.error(error);
+
+  res.status(500).json({
+    message: error.message,
+    stack: error.stack
+  });
+
+}
+};
+
+
+
+// Get Student Attempts
+exports.getAttemptsByUser = async (
+  req,
+  res
+) => {
+  try {
+    const attempts = await Attempt.find({
+      userId: req.user.userId
+    })
+      .populate("questionId")
+      .sort({ createdAt: -1 });
+
+    res.json(attempts);
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Server error"
+    });
+  }
+};
