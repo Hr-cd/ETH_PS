@@ -23,7 +23,7 @@ const authorize =require("../middleware/roleMiddleware");
 router.post(
   "/",
   protect,
-  authorize(ROLES.ADMIN),
+  authorize(ROLES.TEACHER),
   createQuestion
 );
 

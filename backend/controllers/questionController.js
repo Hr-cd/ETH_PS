@@ -9,7 +9,7 @@ exports.createQuestion = async (req, res) => {
       correctAnswer,
       topic,
       difficulty,
-      explanation
+      explanation,
     } = req.body;
 
     const question = await Question.create({
@@ -17,7 +17,11 @@ exports.createQuestion = async (req, res) => {
       correctAnswer,
       topic,
       difficulty,
-      explanation
+      explanation,
+      imageUrl:
+        req.file
+          ? req.file.path
+          : null
     });
     await redisClient.del(
       "/api/questions"

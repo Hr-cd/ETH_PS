@@ -25,6 +25,10 @@ const questionSchema = new mongoose.Schema(
 
     explanation: {
       type: String
+    },
+    
+    imageUrl: {
+      type: String
     }
   },
   {
