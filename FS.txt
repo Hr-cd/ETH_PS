@@ -33,3 +33,31 @@ backend/
 │
 ├── app.js
 └── server.js
+
+
+
+
+frontend/
+│
+src/
+│
+├── api/
+│      axios.js
+│
+├── pages/
+│      Login.jsx
+│      Register.jsx
+│      Dashboard.jsx
+│      CreateQuestion.jsx
+│      SubmitAttempt.jsx
+│      AttemptResult.jsx
+│
+├── components/
+│      Navbar.jsx
+│      ProtectedRoute.jsx
+│
+├── context/
+│      AuthContext.jsx
+│
+├── App.jsx
+└── main.jsx
