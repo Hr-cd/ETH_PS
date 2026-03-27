@@ -52,6 +52,21 @@ const attemptSchema = new mongoose.Schema(
     feedback: {
       type: String,
       default: "Correct response."
+    },
+    
+    analysisStatus: {
+      type: String,
+      enum: [
+        "pending",
+        "processing",
+        "completed",
+        "failed"
+      ],
+      default: "pending"
+    },
+
+    jobId: {
+      type: String
     }
   },
   {

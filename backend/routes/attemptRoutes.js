@@ -19,7 +19,8 @@ const {
 const {
   submitAttempt,
   getAttemptsByUser,
-  getUserAttempts
+  getUserAttempts,
+  getAttemptStatus
 } = require(
   "../controllers/attemptController"
 );
@@ -41,6 +42,12 @@ router.get(
   protect,
   getAttemptsByUser,
   getUserAttempts
+);
+
+router.get(
+  "/:id/status",
+  protect,
+  getAttemptStatus
 );
 
 module.exports = router;

@@ -45,6 +45,8 @@ exports.submitAttempt = async (req, res) => {
         "analyze",
 
         {
+          attemptId:
+            attempt._id,
           questionText:
             question.questionText,
 
@@ -61,7 +63,10 @@ exports.submitAttempt = async (req, res) => {
           backoff: 5000
         }
       );
+      attempt.jobId =
+        job.id;
 
+      await attempt.save();
       confusionType =
         analysis.confusionType;
 
@@ -92,7 +97,11 @@ exports.submitAttempt = async (req, res) => {
       isCorrect,
       confusionType,
       reason,
-      feedback
+      feedback,
+      analysisStatus:
+        isCorrect
+          ? "completed"
+          : "pending"
     });
 
     res.status(201).json(attempt);
@@ -111,7 +120,41 @@ exports.submitAttempt = async (req, res) => {
 }
 };
 
+exports.getAttemptStatus =
+  async (req, res) => {
 
+    const attempt =
+      await Attempt.findById(
+        req.params.id
+      );
+
+    if (!attempt) {
+
+      return res.status(404)
+        .json({
+          message:
+            "Attempt not found"
+        });
+
+    }
+
+    res.json({
+
+      status:
+        attempt.analysisStatus,
+
+      confusionType:
+        attempt.confusionType,
+
+      reason:
+        attempt.reason,
+
+      feedback:
+        attempt.feedback
+
+    });
+
+  };
 
 // Get Student Attempts
 exports.getAttemptsByUser = async (

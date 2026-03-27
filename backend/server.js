@@ -10,11 +10,33 @@ const analyticsRoutes = require("./routes/analyticsRoutes");
 const errorHandler = require("./middleware/errorHandler");
 const securityMiddleware = require("./middleware/security");
 const logger = require("./utils/logger");
+const {createBullBoard} = require("@bull-board/api");
+const {BullMQAdapter} = require("@bull-board/api/bullMQAdapter");
+const {ExpressAdapter} = require("@bull-board/express");
+const {confusionQueue} = require("./config/queue");
 const app = express();
 const PORT = 3000;
 
 require("dotenv").config();
 connectDB();
+const serverAdapter =
+  new ExpressAdapter();
+
+serverAdapter.setBasePath(
+  "/admin/queues"
+);
+
+createBullBoard({
+
+  queues: [
+    new BullMQAdapter(
+      confusionQueue
+    )
+  ],
+
+  serverAdapter
+
+});
   
 // Middleware
 app.use(cors());
@@ -42,6 +64,10 @@ app.use("/api/auth", authRoutes);
 app.use("/api/questions",questionRoutes);
 app.use("/api/attempts",attemptRoutes);
 app.use("/api/analytics",analyticsRoutes);
+app.use(
+  "/admin/queues",
+  serverAdapter.getRouter()
+);
 app.get("/api/protected", protect, (req, res) => {
   res.json({
     message: "Access granted",
