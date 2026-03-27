@@ -1,7 +1,8 @@
 const Attempt = require("../models/Attempt");
 const Question = require("../models/Question");
-const analyzeConfusion = require("../services/aiService");
+// const analyzeConfusion = require("../services/aiService");
 const validateAnswer = require("../services/mathValidator");
+const {confusionQueue} = require("../config/queue");
 
 
 // Submit Answer
@@ -40,12 +41,26 @@ exports.submitAttempt = async (req, res) => {
 
     if (!isCorrect) {
       const analysis =
-        await analyzeConfusion(
-          question.questionText,
-          question.correctAnswer,
+        await confusionQueue.add(
+        "analyze",
+
+        {
+          questionText:
+            question.questionText,
+
+          correctAnswer:
+            question.correctAnswer,
+
           studentAnswer,
+
           steps
-        );
+        },
+
+        {
+          attempts: 3,
+          backoff: 5000
+        }
+      );
 
       confusionType =
         analysis.confusionType;
