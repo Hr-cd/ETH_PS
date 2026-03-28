@@ -19,7 +19,6 @@ const {
 const {
   submitAttempt,
   getAttemptsByUser,
-  getUserAttempts,
   getAttemptStatus
 } = require(
   "../controllers/attemptController"
@@ -40,8 +39,7 @@ router.post(
 router.get(
   "/",
   protect,
-  getAttemptsByUser,
-  getUserAttempts
+  getAttemptsByUser
 );
 
 router.get(

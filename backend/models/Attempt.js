@@ -34,14 +34,8 @@ const attemptSchema = new mongoose.Schema(
 
     confusionType: {
       type: String,
-      enum: [
-        "Conceptual",
-        "Procedural",
-        "Careless",
-        "Prerequisite",
-        "None"
-      ],
-      default: "None"
+      enum: ["Conceptual", "Procedural", "Careless", "Prerequisite", "None", null],
+      default: null
     },
 
     reason: {

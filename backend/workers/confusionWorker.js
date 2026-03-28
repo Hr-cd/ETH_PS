@@ -3,7 +3,7 @@ const { Worker } =
 
 const analyzeConfusion =
   require(
-    "../services/analyzeConfusion"
+    "../services/aiService"
   );
 
   const Attempt =

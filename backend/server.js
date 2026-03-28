@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
@@ -13,17 +14,18 @@ const logger = require("./utils/logger");
 const helmet = require("helmet");
 const rateLimit = require("express-rate-limit");
 const mongoSanitize = require("mongo-sanitize");
-// const mongoSanitize = require("express-mongo-sanitize");
+const MongoSanitize = require("express-mongo-sanitize");
 const hpp = require("hpp");
 const {createBullBoard} = require("@bull-board/api");
 const {BullMQAdapter} = require("@bull-board/api/bullMQAdapter");
 const {ExpressAdapter} = require("@bull-board/express");
 const {confusionQueue} = require("./config/queue");
 const uploadRoutes =require("./routes/uploadRoutes");
+
+require("./workers/confusionWorker");
 const app = express();
 const PORT = 3000;
 
-require("dotenv").config();
 connectDB();
 const limiter = rateLimit({
 
@@ -65,7 +67,7 @@ app.use(cors({
     credentials: true
   }));
 app.use(helmet());
-
+app.use(MongoSanitize());
 app.use((req, res, next) => {
   req.body = mongoSanitize(req.body);
   req.params = mongoSanitize(req.params);
@@ -95,14 +97,14 @@ app.use(
 
   })
 );
-app.use(errorHandler);
-app.use(securityMiddleware);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/questions",questionRoutes);
 app.use("/api/attempts",attemptRoutes);
 app.use("/api/analytics",analyticsRoutes);
 app.use("/api/upload",uploadRoutes);
+app.use(errorHandler);
+app.use(securityMiddleware);
 app.use(
   "/admin/queues",
   serverAdapter.getRouter()

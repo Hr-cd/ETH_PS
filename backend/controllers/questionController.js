@@ -1,37 +1,50 @@
+const redisClient = require("../config/redis");
 const Question = require("../models/Question");
 
 
 // Create Question
 exports.createQuestion = async (req, res) => {
   try {
+
     const {
       questionText,
       correctAnswer,
       topic,
       difficulty,
       explanation,
+      imageUrl
     } = req.body;
 
-    const question = await Question.create({
-      questionText,
-      correctAnswer,
-      topic,
-      difficulty,
-      explanation,
-      imageUrl:
-        req.file
-          ? req.file.path
-          : null
-    });
+    const question =
+      await Question.create({
+
+        questionText,
+        correctAnswer,
+        topic,
+        difficulty,
+        explanation,
+
+        imageUrl:
+          req.file
+            ? req.file.path
+            : imageUrl || null
+
+      });
+
     await redisClient.del(
       "/api/questions"
     );
+
     res.status(201).json(question);
 
   } catch (error) {
+
+    console.error(error);
+
     res.status(500).json({
-      message: "Server error"
+      message: error.message
     });
+
   }
 };
 

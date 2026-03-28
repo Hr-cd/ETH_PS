@@ -47,13 +47,9 @@ const analyzeConfusion = async (
 
         });
 
-        const raw =
-        response.choices[0]
-            .message
-            .content;
-
-        return JSON.parse(raw);
-
+        const raw = response.choices[0].message.content;
+        const cleaned = raw.replace(/```json|```/g, "").trim();
+        return JSON.parse(cleaned);
     } catch (error) {
 
         console.error(

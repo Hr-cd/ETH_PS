@@ -6,7 +6,8 @@ const {
   registerUser,
   loginUser,
   logoutUser,
-  deleteUser
+  deleteUser,
+  getUser
 } = require("../controllers/authController");
 const protect = require("../middleware/authMiddleware");
 const authorize = require("../middleware/roleMiddleware");
@@ -14,9 +15,11 @@ const authorize = require("../middleware/roleMiddleware");
 
 router.post("/register", registerUser);
 
-router.post("/login", loginUser, loginLimiter);
+router.post("/login", loginLimiter, loginUser);
 
 router.post("/logout", protect, logoutUser);
+
+router.get("/user", protect, getUser)
 
 router.delete("/users/:id",protect,
   authorize(

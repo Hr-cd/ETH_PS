@@ -8,6 +8,7 @@ const {confusionQueue} = require("../config/queue");
 // Submit Answer
 exports.submitAttempt = async (req, res) => {
   try {
+
     const {
       questionId,
       studentAnswer,
@@ -15,12 +16,14 @@ exports.submitAttempt = async (req, res) => {
       timeTaken
     } = req.body;
 
-    const userId = req.user.userId;
+    const userId =
+      req.user.userId;
 
-    // Get question
-    const question = await Question.findById(
-      questionId
-    );
+    // 1 — Get question
+    const question =
+      await Question.findById(
+        questionId
+      );
 
     if (!question) {
       return res.status(404).json({
@@ -28,96 +31,116 @@ exports.submitAttempt = async (req, res) => {
       });
     }
 
-    // Check correctness
+    // 2 — Validate answer
     const isCorrect =
       validateAnswer(
         steps,
         studentAnswer
       );
 
-    let confusionType = null;
-    let reason = null;
-    let feedback = null;
+    let confusionType =
+      null;
 
+    let reason =
+      null;
+
+    let feedback =
+      null;
+
+    // 3 — Create attempt FIRST
+    const attempt =
+      await Attempt.create({
+
+        userId,
+        questionId,
+
+        studentAnswer,
+        steps,
+        timeTaken,
+
+        isCorrect,
+
+        confusionType:
+          isCorrect
+            ? "None"
+            : null,
+
+        reason:
+          isCorrect
+            ? "Student solved correctly."
+            : null,
+
+        feedback:
+          isCorrect
+            ? "Correct solution."
+            : null,
+
+        analysisStatus:
+          isCorrect
+            ? "completed"
+            : "pending"
+
+      });
+
+    // 4 — If wrong → queue analysis
     if (!isCorrect) {
-      const analysis =
+
+      const job =
         await confusionQueue.add(
-        "analyze",
+          "analyze",
+          {
+            attemptId:
+              attempt._id,
 
-        {
-          attemptId:
-            attempt._id,
-          questionText:
-            question.questionText,
+            questionText:
+              question.questionText,
 
-          correctAnswer:
-            question.correctAnswer,
+            correctAnswer:
+              question.correctAnswer,
 
-          studentAnswer,
+            studentAnswer,
 
-          steps
-        },
+            steps
+          },
+          {
+            attempts: 3,
+            backoff: 5000
+          }
+        );
 
-        {
-          attempts: 3,
-          backoff: 5000
-        }
-      );
+      // Save job id
       attempt.jobId =
         job.id;
 
       await attempt.save();
-      confusionType =
-        analysis.confusionType;
-
-      reason =
-        analysis.reason;
-
-      feedback =
-        analysis.feedback;
-    }
-    else {
-
-      confusionType = "None";
-
-      reason =
-        "Student solved the problem correctly.";
-
-      feedback =
-        "Correct solution. Keep practicing.";
 
     }
 
-    const attempt = await Attempt.create({
-      userId,
-      questionId,
-      studentAnswer,
-      steps,
-      timeTaken,
-      isCorrect,
-      confusionType,
-      reason,
-      feedback,
-      analysisStatus:
-        isCorrect
-          ? "completed"
-          : "pending"
-    });
+    res.status(201).json(
+      attempt
+    );
 
-    res.status(201).json(attempt);
+  }
 
-  } 
   catch (error) {
 
-  console.error("FULL ERROR:");
-  console.error(error);
+    console.error(
+      "FULL ERROR:"
+    );
 
-  res.status(500).json({
-    message: error.message,
-    stack: error.stack
-  });
+    console.error(
+      error
+    );
 
-}
+    res.status(500).json({
+      message:
+        error.message,
+      stack:
+        error.stack
+    });
+
+  }
+
 };
 
 exports.getAttemptStatus =
@@ -178,58 +201,58 @@ exports.getAttemptsByUser = async (
 };
 
 
-exports.getUserAttempts = async (req, res) => {
-  try {
+// exports.getUserAttempts = async (req, res) => {
+//   try {
 
-    const userId =
-      req.user.userId;
+//     const userId =
+//       req.user.userId;
 
-    const page =
-      parseInt(req.query.page) || 1;
+//     const page =
+//       parseInt(req.query.page) || 1;
 
-    const limit =
-      parseInt(req.query.limit) || 10;
+//     const limit =
+//       parseInt(req.query.limit) || 10;
 
-    const skip =
-      (page - 1) * limit;
+//     const skip =
+//       (page - 1) * limit;
 
-    const total =
-      await Attempt.countDocuments({
-        userId
-      });
+//     const total =
+//       await Attempt.countDocuments({
+//         userId
+//       });
 
-    const attempts =
-      await Attempt
-        .find({ userId })
-        .sort({ createdAt: -1 })
-        .skip(skip)
-        .limit(limit);
+//     const attempts =
+//       await Attempt
+//         .find({ userId })
+//         .sort({ createdAt: -1 })
+//         .skip(skip)
+//         .limit(limit);
 
-    res.json({
+//     res.json({
 
-      total,
+//       total,
 
-      page,
+//       page,
 
-      pages:
-        Math.ceil(total / limit),
+//       pages:
+//         Math.ceil(total / limit),
 
-      data:
-        attempts
+//       data:
+//         attempts
 
-    });
+//     });
 
-  } catch (error) {
+//   } catch (error) {
 
-    console.error(
-      "Fetch attempts error:",
-      error
-    );
+//     console.error(
+//       "Fetch attempts error:",
+//       error
+//     );
 
-    res.status(500).json({
-      message:
-        "Server error"
-    });
+//     res.status(500).json({
+//       message:
+//         "Server error"
+//     });
 
-  }
-};
+//   }
+// };

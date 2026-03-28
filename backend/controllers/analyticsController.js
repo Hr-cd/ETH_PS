@@ -1,4 +1,5 @@
 const Attempt = require("../models/Attempt");
+const mongoose = require("mongoose");
 
 exports.getStudentAnalytics = async (req, res) => {
   try {
@@ -36,9 +37,7 @@ exports.getStudentAnalytics = async (req, res) => {
     const avgTimeResult =
       await Attempt.aggregate([
         {
-          $match: {
-            userId
-          }
+          $match: { userId: new mongoose.Types.ObjectId(userId) }
         },
         {
           $group: {
@@ -62,7 +61,7 @@ exports.getStudentAnalytics = async (req, res) => {
       await Attempt.aggregate([
         {
           $match: {
-            userId
+            userId: new mongoose.Types.ObjectId(userId)
           }
         },
         {
